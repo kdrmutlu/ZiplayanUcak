@@ -24,6 +24,14 @@ public class ZiplayanUcak extends ApplicationAdapter {
 	private static final float UCAK_BASLANGIC_X_KONUM = 50;
 	private static final float UCAK_BASLANGIC_Y_KONUM = 240;
 
+	private enum OyunDurumu{Start, Running, GameOver}
+	private OyunDurumu oyunDurumu = OyunDurumu.Start;
+	private Vector2 yercekimi = new Vector2();
+	private Vector2 ucakYercekimi = new Vector2();
+	private static final float UCAK_ZIPLAMASI = 350;
+	private static final float YERCEKIMI = -20;
+	private static final float UCAK_HIZ = 200;
+
 	@Override
 	public void create () {
 		oyunSayfasi = new SpriteBatch();
@@ -49,8 +57,61 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		ucakPozisyonu.set(UCAK_BASLANGIC_X_KONUM, UCAK_BASLANGIC_Y_KONUM);
 		hareketliKamera.position.x = 400;
 
+		yercekimi.set(0, YERCEKIMI);
+		ucakYercekimi.set(0, 0);
+
 	}
 
+	private void dunyayiGuncelle() {
+		//oyunun frame değişimleri arasındaki geçen zaman
+		float deltaTime = Gdx.graphics.getDeltaTime();
+		gecenZaman += deltaTime;
+
+		//ekrana dokunulduğunda
+		if (Gdx.input.justTouched()){
+
+			if(oyunDurumu == OyunDurumu.Start){
+				oyunDurumu = OyunDurumu.Running;
+			}
+
+			if(oyunDurumu == OyunDurumu.Running){
+				ucakYercekimi.set(UCAK_HIZ, UCAK_ZIPLAMASI);
+			}
+
+			if(oyunDurumu == OyunDurumu.GameOver){
+				oyunDurumu = OyunDurumu.Start;
+				dunyayiResetle();
+			}
+
+		}
+
+		if(oyunDurumu != OyunDurumu.Start){
+			ucakYercekimi.add(yercekimi);
+		}
+
+		//ucakYercekim vektörünü ölçekleyip ucakPozisyonu vektörüne ekle
+		ucakPozisyonu.mulAdd(ucakYercekimi, deltaTime);
+
+		//konumu günceller
+		hareketliKamera.position.x = ucakPozisyonu.x + 350;
+
+		System.out.println("ucak pozisyonu x: " + ucakPozisyonu.x);
+	}
+
+	private void dunyayiCizdir() {
+		hareketliKamera.update();
+
+		//oyun sayfasını hareketli kameraya ayarla
+		oyunSayfasi.setProjectionMatrix(hareketliKamera.combined);
+
+		oyunSayfasi.begin();
+
+		oyunSayfasi.draw(bgResmi, hareketliKamera.position.x - bgResmi.getWidth() / 2, 0);
+
+		oyunSayfasi.draw(ucak.getKeyFrame(gecenZaman), ucakPozisyonu.x, ucakPozisyonu.y);
+
+		oyunSayfasi.end();
+	}
 	@Override
 	public void render () {
 
@@ -62,24 +123,5 @@ public class ZiplayanUcak extends ApplicationAdapter {
 
 	}
 
-	private void dunyayiGuncelle() {
-		//oyunun frame değişimleri arasındaki geçen zaman
-		float deltaTime = Gdx.graphics.getDeltaTime();
-		gecenZaman += deltaTime;
-	}
 
-	private void dunyayiCizdir() {
-		hareketliKamera.update();
-
-		//oyun sayfasını hareketli kameraya ayarla
-		oyunSayfasi.setProjectionMatrix(hareketliKamera.combined);
-
-		oyunSayfasi.begin();
-
-		oyunSayfasi.draw(bgResmi, 0, 0);
-
-		oyunSayfasi.draw(ucak.getKeyFrame(gecenZaman), ucakPozisyonu.x, ucakPozisyonu.y);
-
-		oyunSayfasi.end();
-	}
 }
