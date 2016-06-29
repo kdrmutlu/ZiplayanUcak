@@ -32,6 +32,9 @@ public class ZiplayanUcak extends ApplicationAdapter {
 	private static final float YERCEKIMI = -20;
 	private static final float UCAK_HIZ = 200;
 
+	private TextureRegion zeminResmi, tavanResmi;
+	private float ilkZeminPozisyonX;
+
 	@Override
 	public void create () {
 		oyunSayfasi = new SpriteBatch();
@@ -50,6 +53,10 @@ public class ZiplayanUcak extends ApplicationAdapter {
 
 		ucakPozisyonu = new Vector2();
 
+		zeminResmi = new TextureRegion(new Texture("zemin.png"));
+		tavanResmi = new TextureRegion(zeminResmi);
+		tavanResmi.flip(true, true);
+
 		dunyayiResetle();
 	}
 
@@ -60,6 +67,7 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		yercekimi.set(0, YERCEKIMI);
 		ucakYercekimi.set(0, 0);
 
+		ilkZeminPozisyonX = 0;
 	}
 
 	private void dunyayiGuncelle() {
@@ -96,6 +104,13 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		hareketliKamera.position.x = ucakPozisyonu.x + 350;
 
 		System.out.println("ucak pozisyonu x: " + ucakPozisyonu.x);
+
+		//zeminin devamlılığı burada sağlanır.
+		if(hareketliKamera.position.x > zeminResmi.getRegionWidth() + ilkZeminPozisyonX + 400){
+
+			ilkZeminPozisyonX += zeminResmi.getRegionWidth();
+
+		}
 	}
 
 	private void dunyayiCizdir() {
@@ -107,6 +122,12 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		oyunSayfasi.begin();
 
 		oyunSayfasi.draw(bgResmi, hareketliKamera.position.x - bgResmi.getWidth() / 2, 0);
+
+		//zemin ve tavan ikişer defa çizdiriliyor.
+		oyunSayfasi.draw(zeminResmi, ilkZeminPozisyonX, 0);
+		oyunSayfasi.draw(zeminResmi, ilkZeminPozisyonX + zeminResmi.getRegionWidth(), 0);
+		oyunSayfasi.draw(tavanResmi, ilkZeminPozisyonX, 480 - tavanResmi.getRegionHeight());
+		oyunSayfasi.draw(tavanResmi, ilkZeminPozisyonX + tavanResmi.getRegionWidth(), 480 - tavanResmi.getRegionHeight());
 
 		oyunSayfasi.draw(ucak.getKeyFrame(gecenZaman), ucakPozisyonu.x, ucakPozisyonu.y);
 
