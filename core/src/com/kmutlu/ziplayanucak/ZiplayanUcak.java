@@ -8,8 +8,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 
 public class ZiplayanUcak extends ApplicationAdapter {
@@ -35,6 +36,9 @@ public class ZiplayanUcak extends ApplicationAdapter {
 	private TextureRegion zeminResmi, tavanResmi;
 	private float ilkZeminPozisyonX;
 
+	private TextureRegion kayaResmi, kayaAsagiResmi;
+	private Array<Kaya> kayalar = new Array<Kaya>();
+
 	@Override
 	public void create () {
 		oyunSayfasi = new SpriteBatch();
@@ -57,6 +61,10 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		tavanResmi = new TextureRegion(zeminResmi);
 		tavanResmi.flip(true, true);
 
+		kayaResmi = new TextureRegion(new Texture("kaya.png"));
+		kayaAsagiResmi = new TextureRegion(kayaResmi);
+		kayaAsagiResmi.flip(true, true);
+
 		dunyayiResetle();
 	}
 
@@ -68,6 +76,15 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		ucakYercekimi.set(0, 0);
 
 		ilkZeminPozisyonX = 0;
+
+		//rastgele aşağı veya yukarı kayalar üretip diziye atılıyor.
+		kayalar.clear();
+		for (int i = 0; i<5; i++){
+
+			boolean isDown = MathUtils.randomBoolean();
+
+			kayalar.add(new Kaya(700 + i*200, isDown ? 480 - kayaResmi.getRegionHeight():0, isDown ? kayaAsagiResmi : kayaResmi));
+		}
 	}
 
 	private void dunyayiGuncelle() {
@@ -111,6 +128,21 @@ public class ZiplayanUcak extends ApplicationAdapter {
 			ilkZeminPozisyonX += zeminResmi.getRegionWidth();
 
 		}
+
+		//kaya pozisyonlarını günceller.
+		for(Kaya kaya:kayalar){
+
+			//geçilen kayaları ileriye atar.
+			if(hareketliKamera.position.x - kaya.pozisyon.x > 400 + kaya.resim.getRegionWidth()){
+
+				boolean isDown = MathUtils.randomBoolean();
+				kaya.pozisyon.x += 5*200;
+				kaya.pozisyon.y = isDown ? 480 - this.kayaResmi.getRegionHeight() : 0;
+				kaya.resim = isDown ? kayaAsagiResmi : this.kayaResmi;
+
+			}
+
+		}
 	}
 
 	private void dunyayiCizdir() {
@@ -122,6 +154,12 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		oyunSayfasi.begin();
 
 		oyunSayfasi.draw(bgResmi, hareketliKamera.position.x - bgResmi.getWidth() / 2, 0);
+
+		for(Kaya kaya : kayalar){
+
+			oyunSayfasi.draw(kaya.resim, kaya.pozisyon.x, kaya.pozisyon.y);
+
+		}
 
 		//zemin ve tavan ikişer defa çizdiriliyor.
 		oyunSayfasi.draw(zeminResmi, ilkZeminPozisyonX, 0);
