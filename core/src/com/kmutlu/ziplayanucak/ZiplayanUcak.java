@@ -2,6 +2,7 @@ package com.kmutlu.ziplayanucak;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -39,6 +41,13 @@ public class ZiplayanUcak extends ApplicationAdapter {
 	private TextureRegion kayaResmi, kayaAsagiResmi;
 	private Array<Kaya> kayalar = new Array<Kaya>();
 
+	private TextureRegion readyResim, gameOverResim;
+	private Sound patlama;
+	private Rectangle ucakCerceve = new Rectangle();
+	private Rectangle kayaCerceve = new Rectangle();
+	private OrthographicCamera arayuzKamera;
+
+
 	@Override
 	public void create () {
 		oyunSayfasi = new SpriteBatch();
@@ -64,6 +73,14 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		kayaResmi = new TextureRegion(new Texture("kaya.png"));
 		kayaAsagiResmi = new TextureRegion(kayaResmi);
 		kayaAsagiResmi.flip(true, true);
+
+		arayuzKamera = new OrthographicCamera();
+		arayuzKamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		arayuzKamera.update();
+
+		readyResim = new TextureRegion(new Texture("ready.png"));
+		gameOverResim = new TextureRegion(new Texture("gameover.png"));
+		patlama = Gdx.audio.newSound(Gdx.files.internal("patlama.wav"));
 
 		dunyayiResetle();
 	}
@@ -129,8 +146,15 @@ public class ZiplayanUcak extends ApplicationAdapter {
 
 		}
 
+		//uçağın çerçevesi uçağa sabitlendi.
+		ucakCerceve.set(ucakPozisyonu.x, ucakPozisyonu.y, ucak.getKeyFrames()[0].getRegionWidth(),ucak.getKeyFrames()[0].getRegionHeight());
+
 		//kaya pozisyonlarını günceller.
 		for(Kaya kaya:kayalar){
+
+			//KayaResmi çerçevesini yerleştirir.
+			kayaCerceve.set(kaya.pozisyon.x, kaya.pozisyon.y, (kaya.resim.getRegionWidth() - 30) / 2 + 20, kaya.resim.getRegionHeight() - 10);
+
 
 			//geçilen kayaları ileriye atar.
 			if(hareketliKamera.position.x - kaya.pozisyon.x > 400 + kaya.resim.getRegionWidth()){
@@ -142,6 +166,28 @@ public class ZiplayanUcak extends ApplicationAdapter {
 
 			}
 
+			//uçak kayaya çaptığında Game Over olur.
+			if(ucakCerceve.overlaps(kayaCerceve)){
+
+				if(oyunDurumu != OyunDurumu.GameOver){
+					patlama.play();
+				}
+
+				oyunDurumu = OyunDurumu.GameOver;
+				ucakYercekimi.x = 0;
+			}
+
+		}
+
+		//uçak zemin veya tavana çarptıysa Game over olur.
+		if(ucakPozisyonu.y < zeminResmi.getRegionHeight() - 20 ||
+				ucakPozisyonu.y + ucak.getKeyFrames()[0].getRegionHeight() > 480 - zeminResmi.getRegionHeight() + 20){
+
+			if (oyunDurumu != OyunDurumu.GameOver){
+				patlama.play();
+			}
+			oyunDurumu = OyunDurumu.GameOver;
+			ucakYercekimi.x = 0;
 		}
 	}
 
@@ -168,6 +214,21 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		oyunSayfasi.draw(tavanResmi, ilkZeminPozisyonX + tavanResmi.getRegionWidth(), 480 - tavanResmi.getRegionHeight());
 
 		oyunSayfasi.draw(ucak.getKeyFrame(gecenZaman), ucakPozisyonu.x, ucakPozisyonu.y);
+
+		oyunSayfasi.end();
+
+		//oyun sayfasını arayüz kameraya ayarlar.
+		oyunSayfasi.setProjectionMatrix(arayuzKamera.combined);
+
+		oyunSayfasi.begin();
+
+		if(oyunDurumu == OyunDurumu.Start){
+			oyunSayfasi.draw(readyResim, Gdx.graphics.getWidth() / 2 -readyResim.getRegionWidth() / 2, Gdx.graphics.getHeight() / 2 - readyResim.getRegionHeight() / 2);
+		}
+
+		if(oyunDurumu == OyunDurumu.GameOver){
+			oyunSayfasi.draw(gameOverResim, Gdx.graphics.getWidth() / 2 -gameOverResim.getRegionWidth() / 2, Gdx.graphics.getHeight() / 2 - gameOverResim.getRegionHeight() / 2);
+		}
 
 		oyunSayfasi.end();
 	}
