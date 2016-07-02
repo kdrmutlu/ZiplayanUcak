@@ -91,6 +91,8 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		patlama = Gdx.audio.newSound(Gdx.files.internal("patlama.wav"));
 
 		//shapeRenderer = new ShapeRenderer();
+		font = new BitmapFont(Gdx.files.internal("arial.fnt"));
+
 
 		dunyayiResetle();
 	}
@@ -112,6 +114,8 @@ public class ZiplayanUcak extends ApplicationAdapter {
 
 			kayalar.add(new Kaya(700 + i*200, isDown ? 480 - kayaResmi.getRegionHeight():0, isDown ? kayaAsagiResmi : kayaResmi));
 		}
+
+		puan = 0;
 	}
 
 	private void dunyayiGuncelle() {
@@ -173,6 +177,7 @@ public class ZiplayanUcak extends ApplicationAdapter {
 				kaya.pozisyon.x += 5*200;
 				kaya.pozisyon.y = isDown ? 480 - this.kayaResmi.getRegionHeight() : 0;
 				kaya.resim = isDown ? kayaAsagiResmi : this.kayaResmi;
+				kaya.gecildi = false;
 
 			}
 
@@ -187,6 +192,13 @@ public class ZiplayanUcak extends ApplicationAdapter {
 				ucakYercekimi.x = 0;
 			}
 
+			//kaya geçildiyse puanı 1 arttır.
+			if(kaya.pozisyon.x < ucakPozisyonu.x && !kaya.gecildi){
+
+				puan++;
+				kaya.gecildi = true;
+
+			}
 		}
 
 		//uçak zemin veya tavana çarptıysa Game over olur.
@@ -240,6 +252,11 @@ public class ZiplayanUcak extends ApplicationAdapter {
 			oyunSayfasi.draw(gameOverResim, Gdx.graphics.getWidth() / 2 -gameOverResim.getRegionWidth() / 2, Gdx.graphics.getHeight() / 2 - gameOverResim.getRegionHeight() / 2);
 		}
 
+		if(oyunDurumu == OyunDurumu.GameOver || oyunDurumu == OyunDurumu.Running){
+
+			font.draw(oyunSayfasi, "" + puan, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 60);
+
+		}
 		oyunSayfasi.end();
 
 		//shapeRenderer
