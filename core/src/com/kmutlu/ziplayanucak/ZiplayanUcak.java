@@ -2,13 +2,16 @@ package com.kmutlu.ziplayanucak;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -47,6 +50,11 @@ public class ZiplayanUcak extends ApplicationAdapter {
 	private Rectangle kayaCerceve = new Rectangle();
 	private OrthographicCamera arayuzKamera;
 
+	//private ShapeRenderer shapeRenderer;
+	private BitmapFont font;
+	private int puan = 0;
+	private Music music;
+
 
 	@Override
 	public void create () {
@@ -81,6 +89,8 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		readyResim = new TextureRegion(new Texture("ready.png"));
 		gameOverResim = new TextureRegion(new Texture("gameover.png"));
 		patlama = Gdx.audio.newSound(Gdx.files.internal("patlama.wav"));
+
+		//shapeRenderer = new ShapeRenderer();
 
 		dunyayiResetle();
 	}
@@ -153,7 +163,7 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		for(Kaya kaya:kayalar){
 
 			//KayaResmi çerçevesini yerleştirir.
-			kayaCerceve.set(kaya.pozisyon.x, kaya.pozisyon.y, (kaya.resim.getRegionWidth() - 30) / 2 + 20, kaya.resim.getRegionHeight() - 10);
+			kayaCerceve.set(kaya.pozisyon.x + (kaya.resim.getRegionWidth() - 30) / 2 + 20, kaya.pozisyon.y, 20, kaya.resim.getRegionHeight() - 10);
 
 
 			//geçilen kayaları ileriye atar.
@@ -231,6 +241,19 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		}
 
 		oyunSayfasi.end();
+
+		//shapeRenderer
+		/* shapeRenderer.setProjectionMatrix(hareketliKamera.combined);
+		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+		shapeRenderer.setColor(1, 0, 0, 1);
+
+		shapeRenderer.rect(ucakCerceve.x, ucakCerceve.y, ucakCerceve.width, ucakCerceve.height);
+
+		for(Kaya kaya : kayalar){
+			shapeRenderer.rect(kaya.pozisyon.x + (kaya.resim.getRegionWidth() - 30) / 2 + 20, kaya.pozisyon.y, kayaCerceve.width, kayaCerceve.height);
+		}
+
+		shapeRenderer.end(); */
 	}
 	@Override
 	public void render () {
