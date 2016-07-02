@@ -93,6 +93,9 @@ public class ZiplayanUcak extends ApplicationAdapter {
 		//shapeRenderer = new ShapeRenderer();
 		font = new BitmapFont(Gdx.files.internal("arial.fnt"));
 
+		music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+		music.setLooping(true);
+		music.play();
 
 		dunyayiResetle();
 	}
